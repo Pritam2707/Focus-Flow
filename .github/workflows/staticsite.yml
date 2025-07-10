@@ -1,0 +1,37 @@
+name: Deploy static index.html to GitHub Pages
+
+on:
+  push:
+    branches: ["site"]  # 👈 Your custom branch name
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload index.html and static files
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'  # 👈 assumes index.html, assets/, .nojekyll are at root
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
